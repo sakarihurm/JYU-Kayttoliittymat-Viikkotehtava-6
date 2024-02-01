@@ -2,7 +2,7 @@
 /* globals ReactDOM: false */
 /* globals React: false */
 
-const App = function(props) {
+const App = React.memo(function(props) {
         // Käytetään lähes samaa dataa kuin viikkotehtävässä 1
         // Alustetaan tämän komponentin tilaksi data.
         // Tee tehtävässä vaaditut lisäykset ja muutokset tämän komponentin tilaan
@@ -28,22 +28,25 @@ const App = function(props) {
     	<ListaaJoukkueet />
         </div>);
       /* jshint ignore:end */
-};
+});
 
-const LisaaJoukkue = function(props) {
+// jos komponenttien toiminnassa on ongelmia, voit kokeilla ensin
+// ilman memoa. Valmiiden komponenttien täytyy kuitenkin toimia memon kera.
+
+const LisaaJoukkue = React.memo(function(props) {
       /* jshint ignore:start */
       return (<form>
         </form>);
       /* jshint ignore:end */
-};
+});
 
 
-const ListaaJoukkueet = function(props) {
+const ListaaJoukkueet = React.memo(function(props) {
       /* jshint ignore:start */
       return (<table>
         </table>);
       /* jshint ignore:end */
-};
+});
 
 
 const root = ReactDOM.createRoot( document.getElementById('root'));
