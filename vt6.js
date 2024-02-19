@@ -7,7 +7,9 @@ const App = React.memo(function(props) {
         // Alustetaan tämän komponentin tilaksi data.
         // Tee tehtävässä vaaditut lisäykset ja muutokset tämän komponentin tilaan
         // päivitettäessä React-komponentin tilaa on aina vanha tila kopioitava uudeksi
-        // kopioimista varten on annettu valmis mallifunktio kopioi_kilpailu apufunktiot.js-tiedostossa
+        // apufunktiot.js sisältää esimerkin, jossa koko data kopioidaan, mutta
+        // nykyään voi käyttää myös structuredClone-funktiota, joka osaa suoraan tehdä deepcopyn
+        // kts. https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
         // huom. läheskään kaikissa tilanteissa ei kannata kopioida koko dataa vaan ainoastaan muuttunut osa
         const [data, setData] = React.useState( {} );
         React.useEffect(() => {
