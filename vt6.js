@@ -34,7 +34,6 @@ const App = React.memo(function(props) {
 
 // jos komponenttien toiminnassa on ongelmia, voit kokeilla ensin
 // ilman memoa. Valmiiden komponenttien täytyy kuitenkin toimia memon kera.
-
 const LisaaJoukkue = React.memo(function(props) {
       /* jshint ignore:start */
       return (<form>
