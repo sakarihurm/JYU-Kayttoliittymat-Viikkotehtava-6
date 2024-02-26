@@ -128,7 +128,8 @@ let alusta_data = function(data)
 
     randomit = new Set();
     while( randomit.size < 10 ) {
-      randomit.add( getRandomInt(0,100) )
+      let uusi = getRandomInt(0,100);
+      randomit.add( uusi )
     }
 
     // pienellä todennäköisyydellä voi antaa kaksi samanlaista rastikoodia
