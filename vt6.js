@@ -11,6 +11,7 @@ const App = React.memo(function(props) {
         // nykyään voi käyttää myös structuredClone-funktiota, joka osaa suoraan tehdä deepcopyn
         // kts. https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
         // huom. läheskään kaikissa tilanteissa ei kannata kopioida koko dataa vaan ainoastaan muuttunut osa
+        // palvelimelta haettava data on syytä pitää kaikki yhdessä tilamuuttujassa
         const [data, setData] = React.useState( {} );
         React.useEffect(() => {
             const fetchfunc = async () => {
