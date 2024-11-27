@@ -27,7 +27,7 @@ const App = React.memo(function(props) {
       console.log(data);
       /* jshint ignore:start */
       return (<div>
-    	<LisaaJoukkue />
+    	<LisaaJoukkue data={data}/>
     	<ListaaJoukkueet />
         </div>);
       /* jshint ignore:end */
@@ -37,9 +37,108 @@ const App = React.memo(function(props) {
 // ilman memoa. Valmiiden komponenttien täytyy kuitenkin toimia memon kera.
 const LisaaJoukkue = React.memo(function(props) {
       /* jshint ignore:start */
-      return (<form>
+    let sarjaNimet = [];
+    let leimausTavat = [];
+    let jasenMap = new Map();
+    const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
+    const [sarjanNimi, setSarjanNimi] = React.useState("");
+    const [leimausTapa, setLeimausTapa] = React.useState("");
+
+    try {
+      
+      for (let alkio of props.data.sarjat){
+        sarjaNimet.push(alkio.nimi);
+      }
+      
+      for (let alkio of props.data.leimaustavat){
+        leimausTavat.push(alkio);
+      }
+
+    }catch (ex){
+      console.log("virhe", ex);
+    }
+
+    let handleNimiInput = function(event){
+      setJoukkueenNimi(event.target.value);
+      console.log(joukkueenNimi);
+    }
+
+    let handleSarjat= function(value){
+      setSarjanNimi(value);
+      console.log(sarjanNimi);
+    }
+
+    let handleLeimausTavat = function(value){
+      setLeimausTapa(value);
+      console.log(leimausTapa);
+    }
+
+    let handleJasenInput = function(index, event){
+      jasenMap.set(index, event.target.value);
+    }
+
+    let handleSubmit = function(e){
+        e.preventDefault();
+    }
+
+
+      return (<form id="lomake" action="https://appro.mit.jyu.fi/cgi-bin/view.cgi" method="post">
+        <Joukkueentiedot handleNimiInput={handleNimiInput} handleSarjat={handleSarjat} handleLeimausTavat={handleLeimausTavat} leimaustavat={leimausTavat} sarjanimet={sarjaNimet}/>
+        <Jasenet handleJasenInput={handleJasenInput}/>
+        <button onClick={handleSubmit}>Tallenna</button>
         </form>);
       /* jshint ignore:end */
+});
+
+const Joukkueentiedot = React.memo(function(props){
+  return (<fieldset id="joukkueentiedot">
+    <legend>Joukkueen tiedot</legend>
+    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={() => props.handleNimiInput} required/></label>
+    <Leimaustavat leimaustavat={props.leimaustavat} handleLeimausTavat={props.handleLeimausTavat}/>
+    <Sarjaradiot sarjanimet={props.sarjanimet} handleSarjat={props.handleSarjat}/>
+    </fieldset>)
+});
+
+const Leimaustavat = React.memo(function(props){
+  const labels = [];
+  for (let alkio of props.leimaustavat){
+    let label = <label>{alkio}<input type="checkbox" name="leimaustapa" onClick={() => props.handleLeimausTavat(alkio)}/></label>
+    labels.push(label);
+  }
+
+  return (<span><div>Leimaustavat</div>
+    <div id="leimaustavat">
+    </div>
+    {labels}
+    </span>)
+});
+
+const Sarjaradiot = React.memo(function(props){
+  const labels = [];
+  for (let alkio of props.sarjanimet){
+    let label = <label>{alkio}<input type="radio" name="sarja" onClick={() => props.handleSarjat(alkio)}/></label>
+    labels.push(label);
+  }
+
+  return (<span><div>Sarja</div>
+    <div id="sarjaradiot">
+    </div>
+    {labels}
+    </span>)
+});
+
+const Jasenet = React.memo(function(props){
+
+  let jasenet = [];
+  for (let i = 1; i <= 5; i++){
+    let jasen = <label>Jäsen {i} <input type="text" name="jasen" onChange={(event) => props.handleJasenInput(i, event)} /></label>
+    jasenet.push(jasen);
+  }
+
+  return (<fieldset id="jasentiedot">
+    <legend>Jäsenet</legend>
+    {jasenet}
+  </fieldset>)
 });
 
 
