@@ -39,7 +39,7 @@ const LisaaJoukkue = React.memo(function(props) {
       /* jshint ignore:start */
     let sarjaNimet = [];
     let leimausTavat = [];
-    let jasenMap = new Map();
+    const [jasenMap, setJasenMap] = React.useState(new Map());
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [sarjanNimi, setSarjanNimi] = React.useState("");
     const [leimausTapa, setLeimausTapa] = React.useState("");
@@ -74,11 +74,29 @@ const LisaaJoukkue = React.memo(function(props) {
     }
 
     let handleJasenInput = function(index, event){
-      jasenMap.set(index, event.target.value);
+      setJasenMap(prevMap => {
+        const newMap = new Map(prevMap);
+        newMap.set(index, event.target.value);
+        return newMap; 
+      });
     }
 
     let handleSubmit = function(e){
         e.preventDefault();
+        let jasenTaulukko = Array.from(jasenMap.values());
+        console.log(jasenTaulukko);
+        let uusiJoukkue = {
+          nimi: joukkueenNimi,
+          sarja: sarjanNimi,
+          jasenet: jasenTaulukko,
+          leimaustapa: leimausTapa,
+          aika: "00:00:00",
+          matka: 0,
+          pisteet: 0,
+          rastileimaukset: [],
+          sarja: {},
+        };
+        console.log(uusiJoukkue);
     }
 
 
@@ -93,7 +111,7 @@ const LisaaJoukkue = React.memo(function(props) {
 const Joukkueentiedot = React.memo(function(props){
   return (<fieldset id="joukkueentiedot">
     <legend>Joukkueen tiedot</legend>
-    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={() => props.handleNimiInput} required/></label>
+    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={(event) => props.handleNimiInput(event)} required/></label>
     <Leimaustavat leimaustavat={props.leimaustavat} handleLeimausTavat={props.handleLeimausTavat}/>
     <Sarjaradiot sarjanimet={props.sarjanimet} handleSarjat={props.handleSarjat}/>
     </fieldset>)
