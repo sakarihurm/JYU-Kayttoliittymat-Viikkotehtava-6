@@ -101,8 +101,9 @@ const Joukkueentiedot = React.memo(function(props){
 
 const Leimaustavat = React.memo(function(props){
   const labels = [];
+  let i = 0;
   for (let alkio of props.leimaustavat){
-    let label = <label>{alkio}<input type="checkbox" name="leimaustapa" onClick={() => props.handleLeimausTavat(alkio)}/></label>
+    let label = <label key={i++}>{alkio}<input type="checkbox" name="leimaustapa" onClick={() => props.handleLeimausTavat(alkio)}/></label>
     labels.push(label);
   }
 
@@ -115,8 +116,9 @@ const Leimaustavat = React.memo(function(props){
 
 const Sarjaradiot = React.memo(function(props){
   const labels = [];
+  let i = 0;
   for (let alkio of props.sarjanimet){
-    let label = <label>{alkio}<input type="radio" name="sarja" onClick={() => props.handleSarjat(alkio)}/></label>
+    let label = <label key={i++}>{alkio}<input type="radio" name="sarja" onClick={() => props.handleSarjat(alkio)}/></label>
     labels.push(label);
   }
 
@@ -131,7 +133,7 @@ const Jasenet = React.memo(function(props){
 
   let jasenet = [];
   for (let i = 1; i <= 5; i++){
-    let jasen = <label>Jäsen {i} <input type="text" name="jasen" onChange={(event) => props.handleJasenInput(i, event)} /></label>
+    let jasen = <label key={i}>Jäsen {i} <input type="text" name="jasen" onChange={(event) => props.handleJasenInput(i, event)} /></label>
     jasenet.push(jasen);
   }
 
@@ -149,17 +151,35 @@ const ListaaJoukkueet = React.memo(function(props) {
         for (let alkio of props.data.joukkueet){
           joukkueTaulukko.push(alkio);
         }
-      } catch (ex){
-        console.log("virhe joukkueiden listauksessa", ex);
+
+
+      let haeLeimaukset = function(joukkue){
+
+        let leimauksetMap = new Map();
+        for (let i = 0; i < props.data.leimaustavat.length; i++){
+          leimauksetMap.set(i, props.data.leimaustavat[i]);
+        }
+        
+        let leimauksetTaulukko = [];
+        for (let i = 0; i < joukkue.leimaustapa.length; i++){
+          leimauksetTaulukko.push(joukkue.leimaustapa[i]);
+        }
+
+        let joukkueenLeimaustavat = [] 
+        for (let i = 0; i < leimauksetTaulukko.length; i++){
+          joukkueenLeimaustavat.push(leimauksetMap.get(leimauksetTaulukko[i]));
+        }
+
+        return joukkueenLeimaustavat.join(", ");
       }
 
-      console.log(joukkueTaulukko);
 
       let joukkueet = [];
+      let i = 0;
       for (let alkio of joukkueTaulukko){
-        let joukkue = <tr>
+        let joukkue = <tr key={i++}>
           <td>{alkio.sarja.nimi}</td>
-          <td>{alkio.nimi}</td>
+          <td>{alkio.nimi} ({haeLeimaukset(alkio)})</td>
           </tr>
           joukkueet.push(joukkue);
       }
@@ -175,6 +195,10 @@ const ListaaJoukkueet = React.memo(function(props) {
         {joukkueet}
         </tbody>
         </table>);
+
+} catch (ex){
+  console.log("virhe joukkueiden listauksessa", ex);
+}
       /* jshint ignore:end */
 });
 
