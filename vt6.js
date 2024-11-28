@@ -28,7 +28,7 @@ const App = React.memo(function(props) {
       /* jshint ignore:start */
       return (<div>
     	<LisaaJoukkue data={data}/>
-    	<ListaaJoukkueet />
+    	<ListaaJoukkueet data={data}/>
         </div>);
       /* jshint ignore:end */
 });
@@ -144,7 +144,36 @@ const Jasenet = React.memo(function(props){
 
 const ListaaJoukkueet = React.memo(function(props) {
       /* jshint ignore:start */
+      const joukkueTaulukko = [];
+      try {
+        for (let alkio of props.data.joukkueet){
+          joukkueTaulukko.push(alkio);
+        }
+      } catch (ex){
+        console.log("virhe joukkueiden listauksessa", ex);
+      }
+
+      console.log(joukkueTaulukko);
+
+      let joukkueet = [];
+      for (let alkio of joukkueTaulukko){
+        let joukkue = <tr>
+          <td>{alkio.sarja.nimi}</td>
+          <td>{alkio.nimi}</td>
+          </tr>
+          joukkueet.push(joukkue);
+      }
+
       return (<table>
+        <thead>
+            <tr>
+                <th>Sarja</th>
+                <th>Joukkue</th>
+            </tr>
+        </thead>
+        <tbody>
+        {joukkueet}
+        </tbody>
         </table>);
       /* jshint ignore:end */
 });
