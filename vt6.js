@@ -50,6 +50,8 @@ const LisaaJoukkue = React.memo(function(props) {
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [sarjanNimi, setSarjanNimi] = React.useState("");
     const [leimausTapa, setLeimausTapa] = React.useState("");
+    const [validJoukkueNimi, setvalidJoukkueNimi] = React.useState(false);
+    const [validJoukkueenJasenet, setvalidJoukkueenJasenet] = React.useState(false);
 
     try {
       
@@ -61,13 +63,31 @@ const LisaaJoukkue = React.memo(function(props) {
         leimausTavat.push(alkio);
       }
 
-    }catch (ex){
+    } catch (ex){
       console.log("virhe", ex);
+      return;
     }
 
+
     let handleNimiInput = function(event){
+      let nimiInput = event.target.value.trim().toUpperCase();
+
+      if (nimiInput.length === 0){
+        event.target.setCustomValidity("Nimi ei saa olla tyhjä");
+        event.target.reportValidity();
+        return;
+      }
+
+      for (let alkio of props.data.joukkueet){
+        if (nimiInput === alkio.nimi.trim().toUpperCase()){
+          event.target.setCustomValidity("Joukkue on jo olemassa");
+          event.target.reportValidity();
+          return;
+        }
+      }
+
       setJoukkueenNimi(event.target.value);
-      console.log(joukkueenNimi);
+      setvalidJoukkueNimi(true);
     }
 
     let handleSarjat= function(value){
@@ -81,17 +101,37 @@ const LisaaJoukkue = React.memo(function(props) {
     }
 
     let handleJasenInput = function(index, event){
+
+      let jasen = event.target;
+      let jasenNimi = jasen.value.trim().toUpperCase();
+
+      if (index === 1 || index === 2){
+        if (jasenNimi.length === 0){
+          jasen.setCustomValidity("Lisää vähintään 1 jäsen");
+          jasen.reportValidity();
+          
+          return;
+        }
+      }
+
       setJasenMap(prevMap => {
         const newMap = new Map(prevMap);
         newMap.set(index, event.target.value);
         return newMap; 
       });
+      setvalidJoukkueenJasenet(true);
     }
 
     let handleSubmit = function(e){
         e.preventDefault();
+
+        if (!validJoukkueNimi || !validJoukkueenJasenet){
+          console.log("joukkuuen lisäys epäonnistui");
+          return;
+        }
+
         let jasenTaulukko = Array.from(jasenMap.values());
-        console.log(jasenTaulukko);
+        console.log(sarjanNimi);
         let uusiJoukkue = {
           nimi: joukkueenNimi,
           sarja: sarjanNimi,
@@ -101,10 +141,10 @@ const LisaaJoukkue = React.memo(function(props) {
           matka: 0,
           pisteet: 0,
           rastileimaukset: [],
-          sarja: {},
         };
         console.log(uusiJoukkue);
         props.lisaaUusiJoukkue(uusiJoukkue);
+        document.forms.lomake.reset();
     }
 
 
@@ -119,7 +159,7 @@ const LisaaJoukkue = React.memo(function(props) {
 const Joukkueentiedot = React.memo(function(props){
   return (<fieldset id="joukkueentiedot">
     <legend>Joukkueen tiedot</legend>
-    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={(event) => props.handleNimiInput(event)} required/></label>
+    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onBlur={(event) => props.handleNimiInput(event)} required/></label>
     <Leimaustavat leimaustavat={props.leimaustavat} handleLeimausTavat={props.handleLeimausTavat}/>
     <Sarjaradiot sarjanimet={props.sarjanimet} handleSarjat={props.handleSarjat}/>
     </fieldset>)
@@ -142,9 +182,9 @@ const Leimaustavat = React.memo(function(props){
 
 const Sarjaradiot = React.memo(function(props){
   const labels = [];
-  let i = 0;
-  for (let alkio of props.sarjanimet){
-    let label = <label key={i++}>{alkio}<input type="radio" name="sarja" onClick={() => props.handleSarjat(alkio)}/></label>
+
+  for (let i = 0; i < props.sarjanimet.length; i++){
+    let label = <label key={i}>{props.sarjanimet[i]}<input type="radio" name="sarja" onClick={() => props.handleSarjat(props.sarjanimet[i])}/></label>
     labels.push(label);
   }
 
@@ -159,7 +199,7 @@ const Jasenet = React.memo(function(props){
 
   let jasenet = [];
   for (let i = 1; i <= 5; i++){
-    let jasen = <label key={i}>Jäsen {i} <input type="text" name="jasen" onChange={(event) => props.handleJasenInput(i, event)} /></label>
+    let jasen = <label key={i}>Jäsen {i} <input key={i} type="text" name="jasen" onBlur={(event) => props.handleJasenInput(i, event)} /></label>
     jasenet.push(jasen);
   }
 
