@@ -26,8 +26,15 @@ const App = React.memo(function(props) {
 
       console.log(data);
       /* jshint ignore:start */
+
+      let lisaaUusiJoukkue = function(uusijoukkue){
+        let dataKopio = structuredClone(data);
+        dataKopio.joukkueet.push(uusijoukkue);
+        setData(dataKopio);
+      }
+
       return (<div>
-    	<LisaaJoukkue data={data}/>
+    	<LisaaJoukkue data={data} lisaaUusiJoukkue={lisaaUusiJoukkue}/>
     	<ListaaJoukkueet data={data}/>
         </div>);
       /* jshint ignore:end */
@@ -97,6 +104,7 @@ const LisaaJoukkue = React.memo(function(props) {
           sarja: {},
         };
         console.log(uusiJoukkue);
+        props.lisaaUusiJoukkue(uusiJoukkue);
     }
 
 
