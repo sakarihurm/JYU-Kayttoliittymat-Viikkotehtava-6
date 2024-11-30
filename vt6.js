@@ -50,8 +50,6 @@ const LisaaJoukkue = React.memo(function(props) {
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [sarjanNimi, setSarjanNimi] = React.useState("");
     const [leimausTapa, setLeimausTapa] = React.useState("");
-    const [validJoukkueNimi, setvalidJoukkueNimi] = React.useState(false);
-    const [validJoukkueenJasenet, setvalidJoukkueenJasenet] = React.useState(false);
 
     try {
       
@@ -70,66 +68,42 @@ const LisaaJoukkue = React.memo(function(props) {
 
 
     let handleNimiInput = function(event){
-      let nimiInput = event.target.value.trim().toUpperCase();
-
-      if (nimiInput.length === 0){
-        event.target.setCustomValidity("Nimi ei saa olla tyhjä");
-        event.target.reportValidity();
-        return;
-      }
-
-      for (let alkio of props.data.joukkueet){
-        if (nimiInput === alkio.nimi.trim().toUpperCase()){
-          event.target.setCustomValidity("Joukkue on jo olemassa");
-          event.target.reportValidity();
-          return;
-        }
-      }
-
       setJoukkueenNimi(event.target.value);
-      setvalidJoukkueNimi(true);
     }
 
     let handleSarjat= function(value){
       setSarjanNimi(value);
-      console.log(sarjanNimi);
     }
 
     let handleLeimausTavat = function(value){
       setLeimausTapa(value);
-      console.log(leimausTapa);
     }
 
     let handleJasenInput = function(index, event){
-
-      let jasen = event.target;
-      let jasenNimi = jasen.value.trim().toUpperCase();
-
-      if (index === 1 || index === 2){
-        if (jasenNimi.length === 0){
-          jasen.setCustomValidity("Lisää vähintään 1 jäsen");
-          jasen.reportValidity();
-          
-          return;
-        }
+      if (event.target.value.trim() === 0){
+        return;
       }
-
       setJasenMap(prevMap => {
         const newMap = new Map(prevMap);
         newMap.set(index, event.target.value);
         return newMap; 
       });
-      setvalidJoukkueenJasenet(true);
     }
 
     let handleSubmit = function(e){
         e.preventDefault();
-
-        if (!validJoukkueNimi || !validJoukkueenJasenet){
-          console.log("joukkuuen lisäys epäonnistui");
+        console.log(jasenMap, jasenMap.size);
+        if (!tarkistaJoukkueenNimi(joukkueenNimi, e)){
+          console.log("joukkueen lisäys epäonnistui");
+          e.target.nimi.setCustomValidity("");
           return;
         }
-
+        if (!tarkistaJasenet(jasenMap, e)){
+          console.log("joukkueen lisäys epäonnistui");
+          e.target.jasen[0].setCustomValidity("");
+          return;
+        }
+        
         let jasenTaulukko = Array.from(jasenMap.values());
         console.log(sarjanNimi);
         let uusiJoukkue = {
@@ -145,13 +119,57 @@ const LisaaJoukkue = React.memo(function(props) {
         console.log(uusiJoukkue);
         props.lisaaUusiJoukkue(uusiJoukkue);
         document.forms.lomake.reset();
+        resetState();
     }
 
 
-      return (<form id="lomake" action="https://appro.mit.jyu.fi/cgi-bin/view.cgi" method="post">
+    let tarkistaJoukkueenNimi = function(nimi, event){
+      const nimikentta = event.target.nimi;
+      nimi = nimi.trim().toUpperCase();
+      if (nimi.length === 0){
+        nimikentta.setCustomValidity("nimi ei saa olla tyhjä");
+        nimikentta.reportValidity();
+        return false;
+      }
+
+      for (let alkio of props.data.joukkueet){
+        if (nimi === alkio.nimi.trim().toUpperCase()){
+          nimikentta.setCustomValidity("joukkue on jo olemassa");
+          nimikentta.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    let tarkistaJasenet = function(jasenetMap, event){
+      const jasenkentat = event.target.jasen;
+      if (jasenetMap.size === 0){
+        jasenkentat[0].setCustomValidity("lisää vähintään 1 jäsen");
+        jasenkentat[0].reportValidity();
+        return false;
+      }
+
+      if (!jasenMap.has(1) && !jasenMap.has(2)){
+        jasenkentat[0].setCustomValidity("lisää vähintään 1 jäsen kenttään 1 tai 2");
+        jasenkentat[0].reportValidity();
+        return false;
+      }
+      return true;
+    }
+
+    let resetState = function(){
+      setJasenMap(new Map());
+      setJoukkueenNimi("");
+      setSarjanNimi("");
+      setLeimausTapa("");
+    }
+
+
+      return (<form id="lomake" onSubmit={handleSubmit} action="https://appro.mit.jyu.fi/cgi-bin/view.cgi" method="post">
         <Joukkueentiedot handleNimiInput={handleNimiInput} handleSarjat={handleSarjat} handleLeimausTavat={handleLeimausTavat} leimaustavat={leimausTavat} sarjanimet={sarjaNimet}/>
         <Jasenet handleJasenInput={handleJasenInput}/>
-        <button onClick={handleSubmit}>Tallenna</button>
+        <button type="submit">Tallenna</button>
         </form>);
       /* jshint ignore:end */
 });
@@ -159,7 +177,7 @@ const LisaaJoukkue = React.memo(function(props) {
 const Joukkueentiedot = React.memo(function(props){
   return (<fieldset id="joukkueentiedot">
     <legend>Joukkueen tiedot</legend>
-    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onBlur={(event) => props.handleNimiInput(event)} required/></label>
+    <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={(event) => props.handleNimiInput(event)} required/></label>
     <Leimaustavat leimaustavat={props.leimaustavat} handleLeimausTavat={props.handleLeimausTavat}/>
     <Sarjaradiot sarjanimet={props.sarjanimet} handleSarjat={props.handleSarjat}/>
     </fieldset>)
@@ -199,7 +217,7 @@ const Jasenet = React.memo(function(props){
 
   let jasenet = [];
   for (let i = 1; i <= 5; i++){
-    let jasen = <label key={i}>Jäsen {i} <input key={i} type="text" name="jasen" onBlur={(event) => props.handleJasenInput(i, event)} /></label>
+    let jasen = <label key={i}>Jäsen {i} <input key={i} type="text" name="jasen" onChange={(event) => props.handleJasenInput(i, event)} /></label>
     jasenet.push(jasen);
   }
 
@@ -217,6 +235,25 @@ const ListaaJoukkueet = React.memo(function(props) {
         for (let alkio of props.data.joukkueet){
           joukkueTaulukko.push(alkio);
         }
+        joukkueTaulukko.sort((a,b) => {
+          let aNimi = a.nimi.toUpperCase();
+          let bNimi = b.nimi.toUpperCase();
+          let aSarja = a.sarja.nimi.toUpperCase();
+          let bSarja = b.sarja.nimi.toUpperCase();
+          if (aSarja < bSarja){
+              return -1;
+          } 
+          if (aSarja > bSarja){
+              return 1;
+          }
+          if (aNimi < bNimi){
+              return -1;
+          }
+          if (aNimi > bNimi){
+              return 1;
+          }
+          return 0;
+      });
 
 
       let haeLeimaukset = function(joukkue){
@@ -236,6 +273,7 @@ const ListaaJoukkueet = React.memo(function(props) {
           joukkueenLeimaustavat.push(leimauksetMap.get(leimauksetTaulukko[i]));
         }
 
+        joukkueenLeimaustavat.sort();
         return joukkueenLeimaustavat.join(", ");
       }
 
