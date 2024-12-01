@@ -49,7 +49,6 @@ const LisaaJoukkue = React.memo(function(props) {
     const [jasenMap, setJasenMap] = React.useState(new Map());
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [sarjanNimi, setSarjanNimi] = React.useState("");
-    const [joukkueid, setJoukkueid] = React.useState(0);
 
     try {
       
@@ -80,14 +79,12 @@ const LisaaJoukkue = React.memo(function(props) {
     }
 
     let handleJasenInput = function(index, event){
-      if (event.target.value.trim() === 0){
-        return;
-      }
       setJasenMap(prevMap => {
         const newMap = new Map(prevMap);
         newMap.set(index, event.target.value);
         return newMap; 
       });
+      console.log(jasenMap);
     }
 
     let handleSubmit = function(e){
@@ -109,6 +106,7 @@ const LisaaJoukkue = React.memo(function(props) {
         if (!tarkistaJasenet(jasenMap, e)){
           console.log("joukkueen lisäys epäonnistui");
           e.target.jasen[0].setCustomValidity("");
+          e.target.jasen[1].setCustomValidity("");
           return;
         }
         
@@ -175,9 +173,27 @@ const LisaaJoukkue = React.memo(function(props) {
         return false;
       }
 
-      if (!jasenMap.has(1) && !jasenMap.has(2)){
-        jasenkentat[0].setCustomValidity("lisää vähintään 1 jäsen kenttään 1 tai 2");
+      if (!jasenMap.has(1)){
+        jasenkentat[0].setCustomValidity("lisää vähintään 1 jäsen kenttään 1");
         jasenkentat[0].reportValidity();
+        return false;
+      }
+
+      if (jasenMap.get(1).trim().length === 0){
+        jasenkentat[0].setCustomValidity("kenttä ei saa olla tyhjä");
+        jasenkentat[0].reportValidity();
+        return false;
+      }
+
+      if (!jasenMap.has(2)){
+        jasenkentat[1].setCustomValidity("lisää vähintään 1 jäsen kenttään 2");
+        jasenkentat[1].reportValidity();
+        return false;
+      }
+
+      if (jasenMap.get(2).trim().length === 0){
+        jasenkentat[1].setCustomValidity("kenttä ei saa olla tyhjä");
+        jasenkentat[1].reportValidity();
         return false;
       }
       return true;
