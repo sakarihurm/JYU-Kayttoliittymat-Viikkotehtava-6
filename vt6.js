@@ -84,7 +84,6 @@ const LisaaJoukkue = React.memo(function(props) {
         newMap.set(index, event.target.value);
         return newMap; 
       });
-      console.log(jasenMap);
     }
 
     let handleSubmit = function(e){
@@ -249,12 +248,19 @@ const Leimaustavat = React.memo(function(props){
 });
 
 const Sarjaradiot = React.memo(function(props){
-  const labels = [];
+  const [selectedSarja, setSelectedSarja] = React.useState(props.sarjanimet[0]);
 
+  let handleRadioChange = function(valittusarja){
+    setSelectedSarja(valittusarja);
+    props.handleSarjat(valittusarja);
+  }
+
+  const labels = [];
   for (let i = 0; i < props.sarjanimet.length; i++){
-    let label = <label key={i}>{props.sarjanimet[i]}<input type="radio" name="sarja" onClick={() => props.handleSarjat(props.sarjanimet[i])}/></label>
+    let label = <label key={i}>{props.sarjanimet[i]}<input type="radio" name="sarja" checked={selectedSarja === props.sarjanimet[i]} onChange={() => handleRadioChange(props.sarjanimet[i])}/></label>
     labels.push(label);
   }
+  
 
   return (<span><div>Sarja</div>
     <div id="sarjaradiot">
