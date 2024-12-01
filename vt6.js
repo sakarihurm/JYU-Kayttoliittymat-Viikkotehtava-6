@@ -49,7 +49,7 @@ const LisaaJoukkue = React.memo(function(props) {
     const [jasenMap, setJasenMap] = React.useState(new Map());
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [sarjanNimi, setSarjanNimi] = React.useState("");
-    const [leimausTapa, setLeimausTapa] = React.useState("");
+    const [joukkueid, setJoukkueid] = React.useState(0);
 
     try {
       
@@ -76,7 +76,7 @@ const LisaaJoukkue = React.memo(function(props) {
     }
 
     let handleLeimausTavat = function(value){
-      setLeimausTapa(value);
+
     }
 
     let handleJasenInput = function(index, event){
@@ -92,7 +92,15 @@ const LisaaJoukkue = React.memo(function(props) {
 
     let handleSubmit = function(e){
         e.preventDefault();
-        console.log(jasenMap, jasenMap.size);
+        
+        const leimaukset = e.target.leimaustapa;
+        const leimausTaulukko = [];
+        for (let alkio of leimaukset){
+          if (alkio.checked){
+            leimausTaulukko.push(alkio.value);
+          }
+        }
+
         if (!tarkistaJoukkueenNimi(joukkueenNimi, e)){
           console.log("joukkueen lisäys epäonnistui");
           e.target.nimi.setCustomValidity("");
@@ -104,13 +112,29 @@ const LisaaJoukkue = React.memo(function(props) {
           return;
         }
         
-        let jasenTaulukko = Array.from(jasenMap.values());
-        console.log(sarjanNimi);
-        let uusiJoukkue = {
+        const jasenTaulukko = Array.from(jasenMap.values());
+        const leimauksetMap = new Map();
+        for (let i = 0; i < props.data.leimaustavat.length; i++){
+          leimauksetMap.set(props.data.leimaustavat[i], i);
+        }
+        const joukkueenLeimaukset = [];
+        for (let i = 0; i < leimausTaulukko.length; i++){
+          joukkueenLeimaukset.push(leimauksetMap.get(leimausTaulukko[i]));
+        }
+
+        const uusiJoukkue = {
           nimi: joukkueenNimi,
-          sarja: sarjanNimi,
+          id: haeID(),
+          sarja: {
+            alkuaika: "",
+            id: 0,
+            kesto: 0,
+            loppuaika: "",
+            nimi: sarjanNimi,
+            sarjaid: 0,
+          },
           jasenet: jasenTaulukko,
-          leimaustapa: leimausTapa,
+          leimaustapa: joukkueenLeimaukset,
           aika: "00:00:00",
           matka: 0,
           pisteet: 0,
@@ -122,6 +146,7 @@ const LisaaJoukkue = React.memo(function(props) {
         resetState();
     }
 
+    
 
     let tarkistaJoukkueenNimi = function(nimi, event){
       const nimikentta = event.target.nimi;
@@ -158,11 +183,20 @@ const LisaaJoukkue = React.memo(function(props) {
       return true;
     }
 
+    let haeID = function(){
+      let suurinID = 0;
+      for (let alkio of props.data.joukkueet){
+        if (alkio.id > suurinID) {
+          suurinID = alkio.id;
+        }
+      }
+      return suurinID + 1;
+    }
+
     let resetState = function(){
       setJasenMap(new Map());
       setJoukkueenNimi("");
       setSarjanNimi("");
-      setLeimausTapa("");
     }
 
 
@@ -187,7 +221,7 @@ const Leimaustavat = React.memo(function(props){
   const labels = [];
   let i = 0;
   for (let alkio of props.leimaustavat){
-    let label = <label key={i++}>{alkio}<input type="checkbox" name="leimaustapa" onClick={() => props.handleLeimausTavat(alkio)}/></label>
+    let label = <label key={i++}>{alkio}<input type="checkbox" name="leimaustapa" value={alkio} onClick={() => props.handleLeimausTavat(alkio)}/></label>
     labels.push(label);
   }
 
