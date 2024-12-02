@@ -1,7 +1,88 @@
+
+#root > div:nth-child(1){
+    display: flex;
+    flex-direction: row;
+}
+
+#joukkueentiedot{
+   max-width: 30em;
+   display: flex;
+   flex-direction: column;
+}
+
+/*
+#joukkueen nimi
+*/
+#joukkueentiedot > label:nth-child(2){
+   max-width: 25em;
+   display: flex;
+   justify-content: space-between;
+   margin-bottom: 5em;
+}
+
+/*
+#leimaustavat
+*/
+#joukkueentiedot > span:nth-child(3){
+    max-width: 25em;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1em;
+}
+
+
+/*
+#leimaustavat checkboxit
+*/
+#leimaustavat{
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+/*
+#sarjaradiot
+*/
+#joukkueentiedot > span:nth-child(4){
+    max-width: 25em;
+    display: flex;
+    justify-content: space-between;
+}
+
+/*
+#sarjaradiobuttonit
+*/
+#sarjaradiot{
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+
+
+#jasentiedot{
+    max-width: 30em;
+    display: flex;
+    flex-direction: column;
+}
+
+#jasenkentat{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    
+}
+
+#jasenkentat input{
+    margin-left: 14em;
+    margin-bottom: 1em;
+}
+
 table {
     border-collapse: separate;
     border-spacing: 0.5em;
     width: 25%;
+    margin-left: 3em;
     
 }
 th, td {

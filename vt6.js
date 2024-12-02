@@ -25,7 +25,7 @@ const App = React.memo(function(props) {
          }, []);
 
       console.log(data);
-      /* jshint ignore:start */
+
 
       let lisaaUusiJoukkue = function(uusijoukkue){
         let dataKopio = structuredClone(data);
@@ -37,13 +37,12 @@ const App = React.memo(function(props) {
     	<LisaaJoukkue data={data} lisaaUusiJoukkue={lisaaUusiJoukkue}/>
     	<ListaaJoukkueet data={data}/>
         </div>);
-      /* jshint ignore:end */
+
 });
 
 // jos komponenttien toiminnassa on ongelmia, voit kokeilla ensin
 // ilman memoa. Valmiiden komponenttien täytyy kuitenkin toimia memon kera.
 const LisaaJoukkue = React.memo(function(props) {
-      /* jshint ignore:start */
     let sarjaNimet = [];
     let leimausTavat = [];
     try {
@@ -215,11 +214,12 @@ const LisaaJoukkue = React.memo(function(props) {
 
 
       return (<form id="lomake" onSubmit={handleSubmit} action="https://appro.mit.jyu.fi/cgi-bin/view.cgi" method="post">
+        <h1>Lisää joukkue</h1>
         <Joukkueentiedot handleNimiInput={handleNimiInput} handleSarjat={handleSarjat} handleLeimausTavat={handleLeimausTavat} leimaustavat={leimausTavat} sarjanimet={sarjaNimet} selectedSarja={selectedSarja}/>
         <Jasenet handleJasenInput={handleJasenInput}/>
         <button type="submit">Tallenna</button>
         </form>);
-      /* jshint ignore:end */
+
 });
 
 const Joukkueentiedot = React.memo(function(props){
@@ -241,16 +241,14 @@ const Leimaustavat = React.memo(function(props){
 
   return (<span><div>Leimaustavat</div>
     <div id="leimaustavat">
-    </div>
     {labels}
+    </div>
     </span>)
 });
 
 const Sarjaradiot = React.memo(function(props){
-  // const [selectedSarja, setSelectedSarja] = React.useState(props.sarjanimet[0]);
 
   let handleRadioChange = function(valittusarja){
-    // setSelectedSarja(valittusarja);
     props.handleSarjat(valittusarja);
   }
 
@@ -263,8 +261,8 @@ const Sarjaradiot = React.memo(function(props){
 
   return (<span><div>Sarja</div>
     <div id="sarjaradiot">
-    </div>
     {labels}
+    </div>
     </span>)
 });
 
@@ -278,23 +276,25 @@ const Jasenet = React.memo(function(props){
 
   return (<fieldset id="jasentiedot">
     <legend>Jäsenet</legend>
+    <div id="jasenkentat">
     {jasenet}
+    </div>
   </fieldset>)
 });
 
 
 const ListaaJoukkueet = React.memo(function(props) {
-      /* jshint ignore:start */
+      
       const joukkueTaulukko = [];
       try {
         for (let alkio of props.data.joukkueet){
           joukkueTaulukko.push(alkio);
         }
         joukkueTaulukko.sort((a,b) => {
-          let aNimi = a.nimi.toUpperCase();
-          let bNimi = b.nimi.toUpperCase();
-          let aSarja = a.sarja.nimi.toUpperCase();
-          let bSarja = b.sarja.nimi.toUpperCase();
+          let aNimi = a.nimi.toUpperCase().trim();
+          let bNimi = b.nimi.toUpperCase().trim();
+          let aSarja = a.sarja.nimi.toUpperCase().trim();
+          let bSarja = b.sarja.nimi.toUpperCase().trim();
           if (aSarja < bSarja){
               return -1;
           } 
@@ -358,7 +358,7 @@ const ListaaJoukkueet = React.memo(function(props) {
 } catch (ex){
   console.log("virhe joukkueiden listauksessa", ex);
 }
-      /* jshint ignore:end */
+      
 });
 
 
