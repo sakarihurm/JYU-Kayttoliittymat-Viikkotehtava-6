@@ -27,6 +27,10 @@ const App = React.memo(function(props) {
       console.log(data);
 
 
+      /**
+       * Lisää uuden joukkueen App komponentin tilaan
+       * @param {Object} uusijoukkue 
+       */
       let lisaaUusiJoukkue = function(uusijoukkue){
         let dataKopio = structuredClone(data);
         dataKopio.joukkueet.push(uusijoukkue);
@@ -48,34 +52,44 @@ const LisaaJoukkue = React.memo(function(props) {
     try {
       
       for (let alkio of props.data.sarjat){
-        sarjaNimet.push(alkio.nimi);
+        sarjaNimet.push(alkio.nimi); // Lisätään taulukkoon datasta sarjojen nimet
       }
       
       for (let alkio of props.data.leimaustavat){
-        leimausTavat.push(alkio);
+        leimausTavat.push(alkio); // Lisätään taulukkoon datasta leimaustavat
       }
 
     } catch (ex){
-      console.log("virhe", ex);
+      console.log("virhe", ex); // Jos data on tyhjä, otetaan se kiinni ja poistutaan
       return;
     }
     
+    // Tilamuuttujien alustus
     const [jasenMap, setJasenMap] = React.useState(new Map());
     const [joukkueenNimi, setJoukkueenNimi] = React.useState("");
     const [selectedSarja, setSelectedSarja] = React.useState(sarjaNimet[0]);
 
+    /**
+     * Asettaa joukkueenNimi tilamuuttujalle uuden arvon
+     * @param {Event} event 
+     */
     let handleNimiInput = function(event){
       setJoukkueenNimi(event.target.value);
     }
 
+    /**
+     * Asettaa selectedSarja tilamuuttujalle uuden arvon
+     * @param {String} event 
+     */
     let handleSarjat = function(value){
       setSelectedSarja(value);
     }
 
-    let handleLeimausTavat = function(value){
-
-    }
-
+    /**
+     * Päivittää jasenMap tilamuuttujaa
+     * @param {Number} index 
+     * @param {Event} event 
+     */
     let handleJasenInput = function(index, event){
       setJasenMap(prevMap => {
         const newMap = new Map(prevMap);
@@ -84,6 +98,19 @@ const LisaaJoukkue = React.memo(function(props) {
       });
     }
 
+    /**
+     * Suoritetaan kun tallenna -painiketta on painettu.
+     * Funkio:
+     * - Hakee kaikki leimaukset, jotka on ruksittu.
+     * - Kutsuu joukkueen nimen ja jäsenien tarkistusfunktioita
+     * - Hakee jasenMapista jäsenien nimet taulukkoon
+     * - Hakee leimauksia vastaavat numerot datasta
+     * - Luo uuden joukkueen
+     * 
+     * Mainituista asioista olisi voinut tehdä omat funktiot
+     * @param {Event} e 
+     * @returns 
+     */
     let handleSubmit = function(e){
         e.preventDefault();
         
@@ -91,15 +118,17 @@ const LisaaJoukkue = React.memo(function(props) {
         const leimausTaulukko = [];
         for (let alkio of leimaukset){
           if (alkio.checked){
-            leimausTaulukko.push(alkio.value);
+            leimausTaulukko.push(alkio.value); // Haetaa kaikki ruksatut leimaukset ja lisätään ne taulukkoon
           }
         }
 
+        // Tarkistetaan joukkueen nimi, jos nimi ei kelpaa niin poistutaan.
         if (!tarkistaJoukkueenNimi(joukkueenNimi, e)){
           console.log("joukkueen lisäys epäonnistui");
           e.target.nimi.setCustomValidity("");
           return;
         }
+        // Tarkistetaan jäsenet, jos tarkistus ei mene läpi niin poistutaan.
         if (!tarkistaJasenet(jasenMap, e)){
           console.log("joukkueen lisäys epäonnistui");
           e.target.jasen[0].setCustomValidity("");
@@ -107,19 +136,23 @@ const LisaaJoukkue = React.memo(function(props) {
           return;
         }
         
-        const jasenTaulukko = Array.from(jasenMap.values());
+        const jasenTaulukko = Array.from(jasenMap.values()); // Haetaan jasenMapista jäsenien nimet ja lisätään ne taulukkoon
+        
+        // Haetaan datasta leimaustapoja vastaavat numerot
         const leimauksetMap = new Map();
         for (let i = 0; i < props.data.leimaustavat.length; i++){
           leimauksetMap.set(props.data.leimaustavat[i], i);
         }
+        // Haetaan käyttäjän valitsemia leimaustapoja vastaavat numerot
         const joukkueenLeimaukset = [];
         for (let i = 0; i < leimausTaulukko.length; i++){
           joukkueenLeimaukset.push(leimauksetMap.get(leimausTaulukko[i]));
         }
 
+        // Luodaan uusi joukkue
         const uusiJoukkue = {
           nimi: joukkueenNimi,
-          id: haeID(),
+          id: haeID(), // Haetaan joukkueelle uniikki id kutsumalla haeID funktiota
           sarja: {
             alkuaika: "",
             id: 0,
@@ -136,13 +169,19 @@ const LisaaJoukkue = React.memo(function(props) {
           rastileimaukset: [],
         };
         console.log(uusiJoukkue);
-        props.lisaaUusiJoukkue(uusiJoukkue);
-        document.forms.lomake.reset();
-        resetState();
+        props.lisaaUusiJoukkue(uusiJoukkue); // Kutsutaan joukkueen lisäystä App -komponentissa propsien avulla
+        document.forms.lomake.reset(); // Tyhjennetään lomake
+        resetState(); // Alustetaan tilamuuttujat uudelleen
     }
 
     
-
+    /**
+     * Tarkistaa onko joukkueen nimi tyhjä tai onko joukkue jo olemassa.
+     * Virheistä ilmoitetaan käyttäjälle seCustomValidity ja reportValidity metodien avulla.
+     * @param {String} nimi 
+     * @param {Event} event 
+     * @returns false jos tyhjä tai olemassa, muussa tapauksessa true
+     */
     let tarkistaJoukkueenNimi = function(nimi, event){
       const nimikentta = event.target.nimi;
       nimi = nimi.trim().toUpperCase();
@@ -162,6 +201,13 @@ const LisaaJoukkue = React.memo(function(props) {
       return true;
     }
 
+    /**
+     * Tarkistaa onko yhtään jäsentä lisätty kenttään 1 tai 2.
+     * Virheistä ilmoitetaan käyttäjälle seCustomValidity ja reportValidity metodien avulla.
+     * @param {Map} jasenetMap 
+     * @param {Event} event 
+     * @returns false jos kenttä 1 tai 2 on tyhjä, muussa tapauksessa true
+     */
     let tarkistaJasenet = function(jasenetMap, event){
       const jasenkentat = event.target.jasen;
       if (jasenetMap.size === 0){
@@ -196,6 +242,11 @@ const LisaaJoukkue = React.memo(function(props) {
       return true;
     }
 
+    /**
+     * Käy läpi kaikki joukkueet datasta ja etsii suurimman ID:n.
+     * ID:seen lisätään 1 ja palautetaan.
+     * @returns suurin löydetty ID + 1
+     */
     let haeID = function(){
       let suurinID = 0;
       for (let alkio of props.data.joukkueet){
@@ -206,6 +257,9 @@ const LisaaJoukkue = React.memo(function(props) {
       return suurinID + 1;
     }
 
+    /**
+     * Alustaa kaikki tilamuuttujat uudestaan.
+     */
     let resetState = function(){
       setJasenMap(new Map());
       setJoukkueenNimi("");
@@ -215,27 +269,33 @@ const LisaaJoukkue = React.memo(function(props) {
 
       return (<form id="lomake" onSubmit={handleSubmit} action="https://appro.mit.jyu.fi/cgi-bin/view.cgi" method="post">
         <h1>Lisää joukkue</h1>
-        <Joukkueentiedot handleNimiInput={handleNimiInput} handleSarjat={handleSarjat} handleLeimausTavat={handleLeimausTavat} leimaustavat={leimausTavat} sarjanimet={sarjaNimet} selectedSarja={selectedSarja}/>
+        <Joukkueentiedot handleNimiInput={handleNimiInput} handleSarjat={handleSarjat} leimaustavat={leimausTavat} sarjanimet={sarjaNimet} selectedSarja={selectedSarja}/>
         <Jasenet handleJasenInput={handleJasenInput}/>
         <button type="submit">Tallenna</button>
         </form>);
 
 });
 
+/**
+ * Komponentti vie propseista saadut parametrit eteenpäin Leimaustavat ja Sarjaradiot komponenteille
+ */
 const Joukkueentiedot = React.memo(function(props){
   return (<fieldset id="joukkueentiedot">
     <legend>Joukkueen tiedot</legend>
     <label>Nimi <input id="joukkueennimi" type="text" name="nimi" onChange={(event) => props.handleNimiInput(event)} required/></label>
-    <Leimaustavat leimaustavat={props.leimaustavat} handleLeimausTavat={props.handleLeimausTavat}/>
+    <Leimaustavat leimaustavat={props.leimaustavat} />
     <Sarjaradiot sarjanimet={props.sarjanimet} handleSarjat={props.handleSarjat} selectedSarja={props.selectedSarja}/>
     </fieldset>)
 });
 
+/**
+ * Komponentti lisää kaikki datasta saadut leimaustavat näkyviin sovellukseen
+ */
 const Leimaustavat = React.memo(function(props){
   const labels = [];
   let i = 0;
   for (let alkio of props.leimaustavat){
-    let label = <label key={i++}>{alkio}<input type="checkbox" name="leimaustapa" value={alkio} onClick={() => props.handleLeimausTavat(alkio)}/></label>
+    let label = <label key={i++}>{alkio}<input type="checkbox" name="leimaustapa" value={alkio} /></label>
     labels.push(label);
   }
 
@@ -246,8 +306,17 @@ const Leimaustavat = React.memo(function(props){
     </span>)
 });
 
+/**
+ * Komponentti lisää kaikki datasta saadut sarjat näkyviin sovellukseen
+ * Jokainen radiobutton kutsuu muutoksen yhteydessä kautta handleRadioChange funktiota.
+ */
 const Sarjaradiot = React.memo(function(props){
 
+  /**
+   * Välittää parametrina saadun sarjan eteenpäin propsien avulla handleSarjat funktiolle.
+   * Jokainen radiobutton saa propsien kautta selectedSarja tilamuuttujan, jonka avulla voidaan tarkistaa onko kyseinen sarja valittuna
+   * @param {String} valittusarja 
+   */
   let handleRadioChange = function(valittusarja){
     props.handleSarjat(valittusarja);
   }
@@ -258,7 +327,6 @@ const Sarjaradiot = React.memo(function(props){
     labels.push(label);
   }
   
-
   return (<span><div>Sarja</div>
     <div id="sarjaradiot">
     {labels}
@@ -266,6 +334,10 @@ const Sarjaradiot = React.memo(function(props){
     </span>)
 });
 
+/**
+ * Komponentti lisää 5 jäsenkenttää. 
+ * Jokainen kenttä kutsuu muutoksen yhteydessä propsien kautta handleJasenInput funktiota.
+ */
 const Jasenet = React.memo(function(props){
 
   let jasenet = [];
@@ -282,14 +354,18 @@ const Jasenet = React.memo(function(props){
   </fieldset>)
 });
 
-
+/**
+ * Komponentti listaa kaikki datasta saadut joukkueet näkyviin sovellukseen ja järjestää ne.
+ */
 const ListaaJoukkueet = React.memo(function(props) {
       
       const joukkueTaulukko = [];
       try {
         for (let alkio of props.data.joukkueet){
-          joukkueTaulukko.push(alkio);
+          joukkueTaulukko.push(alkio); // Lisätään kaikki joukkueet datasta uuteen taulukkoon
         }
+
+        // Järjestetään taulukko ensin sarjan mukaan ja sitten joukkueen nimen mukaan
         joukkueTaulukko.sort((a,b) => {
           let aNimi = a.nimi.toUpperCase().trim();
           let bNimi = b.nimi.toUpperCase().trim();
@@ -311,6 +387,11 @@ const ListaaJoukkueet = React.memo(function(props) {
       });
 
 
+      /**
+       * Hakee joukkueen leimaustavat ja palauttaa ne merkkijonona
+       * @param {Object} joukkue 
+       * @returns 
+       */
       let haeLeimaukset = function(joukkue){
 
         let leimauksetMap = new Map();
